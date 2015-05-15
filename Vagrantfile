@@ -1,3 +1,6 @@
+BASIC_ARGS = "-d --net host --name softether"
+CONFIG_ARGS = "-v /vagrant/vpnserver/vpn_server.config:/usr/local/vpnserver/vpn_server.config"
+
 Vagrant.configure("2") do |config|
   config.vm.provider :digital_ocean do |provider, override|
     override.ssh.private_key_path = ENV["DO_KEY_PATH"]
@@ -11,8 +14,15 @@ Vagrant.configure("2") do |config|
 
     override.vm.provision "docker" do |d|
       d.pull_images "frosquin/softether"
+
+      if File.exist?("./vpnserver/vpn_server.config")
+        ARGS = BASIC_ARGS + CONFIG_ARGS
+      else
+        ARGS = BASIC_ARGS
+      end
+
       d.run "frosquin/softether",
-        args: "-d --net host --name softether"
+        args: ARGS
     end
   end
 end
